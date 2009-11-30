@@ -20,16 +20,18 @@ class BlogSubscriber(Component):
 
     #IAnnouncementSubscriber
     def get_subscription_realms(self):
-        yield 'blog'
+        return ('blog',)
     
     def get_subscription_categories(self, realm):
         if realm == "blog":
-            yield 'post created'
-            yield 'post changed'
-            yield 'post deleted'
-            yield 'comment created'
-            yield 'comment changed'
-            yield 'comment deleted'
+            return (
+              'post created',
+              'post changed',
+              'post deleted',
+              'comment created',
+              'comment changed',
+              'comment deleted'
+            )
     
     def get_subscriptions_for_event(self, event):
         if event.realm == 'blog':
@@ -54,8 +56,8 @@ class BlogSubscriber(Component):
             SELECT value, authenticated
               FROM session_attribute 
              WHERE name='announcer_blog_my_posts'
-               AND sid='%s'
-        """, (event.blog_post.author,))
+               AND sid=%s
+        """, (str(event.blog_post.author),))
         result = cursor.fetchone()
         if (result and istrue(result[0])) or self.always_notify_author:
             yield (

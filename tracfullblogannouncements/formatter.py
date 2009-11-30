@@ -17,20 +17,24 @@ class BlogEmailFormatter(Component):
             objects.""")
 
     def get_format_transport(self):
-        yield 'email'
+        return 'email'
 
     def get_format_realms(self, transport):
-        if transport is 'email':
+        if transport == 'email':
             yield 'blog'
 
     def get_format_styles(self, transport, realm):
-        if transport is 'email' and realm is 'blog':
+        self.log.error('format styles')
+        if transport == 'email' and realm == 'blog':
             yield 'text/plain'
 
     def get_format_alternative(self, transport, realm, style):
-        yield 'text/plain'
+        self.log.error('format styles')
+        if transport == 'email' and realm == 'blog':
+            yield 'text/plain'
 
     def format(self, transport, realm, style, event):
+        self.log.error('creating email for blog')
         if transport is 'email' and realm is 'wiki' and style is 'test/plain':
             blog_post = event.blog_post
             blog_comment = event.blog_comment
