@@ -1,0 +1,40 @@
+#if category == 'post_created' or category == 'post_updated'
+#if category == 'post_created'
+Added post "${name}" by ${author} at ${time}
+#end
+#if category == 'post_updated'
+Changed post "${name}" by ${author} at ${time}. 
+Revision: ${version} 
+#end
+Page URL: ${link}
+
+Content:
+
+Title: ${title}
+
+${body}
+
+
+
+#if comment
+Comment: ${comment}
+#end
+#end
+
+#if category == 'post_deleted'
+Deleted post "${name}" by ${author} at ${time}
+#end
+#if category == 'post_deleted_version'
+Page URL: ${link}
+Deleted version "${version}" of post "${name}" by ${author} at ${time}
+#end
+
+#if category == 'post_comment_added'
+Comment added to post "${name}" by ${author} at ${time}
+Page URL: ${link}
+
+Content:
+
+${comment}
+
+#end
