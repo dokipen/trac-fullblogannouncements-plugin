@@ -26,13 +26,12 @@ setup(
       keywords='trac plugin',
       license="BSD",
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests*']),
-      include_package_data=True,
       package_data = {
         'tracfullblogannouncements': 
           [
             'templates/*.html', 
-            'templates/*.txt'
-          ] 
+            'templates/*.txt',
+          ],
       },
       entry_points = {
         'trac.plugins': [
@@ -41,9 +40,4 @@ setup(
           'tracfullblogannouncements.formatter = tracfullblogannouncements.formatter',
         ],
       },
-      extras_require={
-        'fullblogplugin': "TracFullBlogPlugin>=0.1",
-        'announcerplugin': "AnnouncerPlugin>=0.2"
-      }
 )
-

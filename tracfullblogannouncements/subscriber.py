@@ -1,15 +1,24 @@
-from trac.core import *
-from trac.config import BoolOption
 from announcerplugin.api import IAnnouncementSubscriber, istrue
 from announcerplugin.api import IAnnouncementPreferenceProvider
+from pkg_resources import resource_filename
+from trac.core import *
+from trac.config import BoolOption
+from trac.web.chrome import ITemplateProvider
 
 class BlogSubscriber(Component):
     implements(IAnnouncementSubscriber, IAnnouncementPreferenceProvider)
+    implements(ITemplateProvider)
 
     always_notify_author = BoolOption('fullblog-announcement', 
             'always_notify_author', 'true', doc="""Notify the blog author
             of any changes to her blogs, including changes to comments.""")
 
+    #ITemplateProvider
+    def get_templates_dirs(self):
+        resource_dir = resource_filename(__name__, 'templates')
+        return [resource_dir]
+
+    #IAnnouncementSubscriber
     def get_subscription_realms(self):
         yield 'blog'
     
@@ -91,30 +100,34 @@ class BlogSubscriber(Component):
         for result in cursor.fetchall():
             yield (result[0], istrue(result[1]), 'All Blog Subscription')
 
+    #IAnnouncementPreferenceProvider
     def get_announcement_preference_boxes(self, req):
         if req.authname == "anonymous" and 'email' not in req.session:
             return
         yield "blog", "Blog Subscriptions"
         
     def render_announcement_preference_box(self, req, panel):
-        sess = req.session
         if req.method == "POST":
             for option in ('my_posts', 'new_posts', 'all'):
                 if req.args.get('announcer_blog_%s'%option):
-                    sess['announcer_blog_%s'%option] = '1'
+                    req.session['announcer_blog_%s'%option] = '1'
                 else:
-                    del sess['announcer_blog_%s'%option]
-            authors = req.args.get('announcer_blog_authors')
-            if len(authors.strip()):
-                sess['announcer_blog_author_posts'] = authors
-            else:
-                del sess['announcer_blog_author_posts']
+                    req.session['announcer_blog_%s'%option] = '0'
+            authors = req.args.get('announcer_blog_author_posts', '')
+            req.session['announcer_blog_author_posts'] = authors
                 
+        my_posts = req.session.get('announcer_blog_my_posts')
+        if my_posts is None:
+            my_posts = self.always_notify_author and '1'
+        new_posts = req.session.get('announcer_blog_new_posts')
+        all = req.session.get('announcer_blog_all')
+        author_posts = req.session.get('announcer_blog_author_posts')
+
         data = dict(
-            announcer_blog_my_posts = 1,
-            announcer_blog_new_posts = 1,
-            announcer_blog_all = 1,
-            announcer_blog_author_posts = ''
+            announcer_blog_my_posts = my_posts == '1' or None, 
+            announcer_blog_new_posts = new_posts == '1' or None,
+            announcer_blog_all = all == '1' or None,
+            announcer_blog_author_posts = author_posts
         )
         return "prefs_announcer_blog.html", dict(data=data)
 
