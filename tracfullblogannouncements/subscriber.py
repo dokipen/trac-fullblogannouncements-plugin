@@ -51,13 +51,13 @@ class BlogSubscriber(Component):
         db = self.env.get_db_cnx()
         cursor = db.cursor()
 
-        #  My Posts
+        # My Posts
         cursor.execute("""
             SELECT value, authenticated
               FROM session_attribute 
              WHERE name='announcer_blog_my_posts'
                AND sid=%s
-        """, (str(event.blog_post.author),))
+        """, (event.blog_post.author,))
         result = cursor.fetchone()
         if (result and istrue(result[0])) or self.always_notify_author:
             yield (
@@ -66,7 +66,7 @@ class BlogSubscriber(Component):
                 'My Post Subscription'
             )
 
-        if event.category is 'post created':
+        if event.category == 'post created':
             # New Posts
             cursor.execute("""
                 SELECT sid, authenticated
@@ -82,7 +82,7 @@ class BlogSubscriber(Component):
                 SELECT sid, authenticated, value
                   FROM session_attribute 
                  WHERE name='announcer_blog_author_posts'
-            """, (event.blog_post.author,))
+            """)
             for result in cursor.fetchall():
                 for name in [i.strip() for i in result[2].split(',')]:
                     if name == event.blog_post.author:
